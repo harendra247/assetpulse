@@ -68,6 +68,8 @@ python -m pytest -q           # 31 unit tests
 | `assetpulse/viz.py`, `app.py`, `.streamlit/config.toml` | Dark-theme panel dashboard: status tiles, health trend, fault donut, deviation bars, signal table, twin, signal charts |
 | `scripts/validate.py`, `calibrate.py` | Success-criteria check; derives the failure-level numbers in config |
 
+> **Full explanation of the logic, with a worked example:** [docs/PREDICTIVE_MAINTENANCE_LOGIC.md](docs/PREDICTIVE_MAINTENANCE_LOGIC.md)
+
 ## How the analytics work
 
 1. **Features**: 10 numbers per reading (vibration overall / 1x / high-frequency, sound level / high-frequency band,
