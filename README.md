@@ -8,10 +8,48 @@ and a recommended action in a Streamlit dashboard.
 > All data is **synthetic**. Results show the approach and that the pipeline works. They say nothing about
 > accuracy on a real machine.
 
+## Demo: the end-to-end workflow in screenshots
+
+One simulated bearing failure, replayed at three points in time. The dashboard only uses data up to the chosen day,
+so each screenshot is "what the system knew then". Dotted lines (simulated truth) are shown for the reader only; the analytics never sees them.
+
+| Day 25: normal | Day 42: early warning | Day 52: act now |
+| --- | --- | --- |
+| [![day 25](docs/screenshots/01_bearing_normal.png)](docs/screenshots/01_bearing_normal.png) | [![day 42](docs/screenshots/02_bearing_early_warning.png)](docs/screenshots/02_bearing_early_warning.png) | [![day 52](docs/screenshots/03_bearing_act_now.png)](docs/screenshots/03_bearing_act_now.png) |
+
+**What happens, step by step**
+
+1. **Machine and sensors.** The simulated AHU fan reports 10 signals every 10 minutes (vibration, sound, temperatures, current, power, ripple).
+2. **Digital twin.** The twin holds the fan's spec, operating state and a health value per component (Air filter, Drive belt, Fan bearings, Fan impeller, Motor).
+3. **Day 25, normal.** Every signal sits inside its normal band for the current fan speed: Healthy, no action.
+4. **Day 42, early warning.** High-frequency vibration is 13 noise units above normal and bearing temperature and high-frequency sound have started to move. The pattern matches *bearing wear* at 97%, health is 91 (Watch), and the system says: *maintenance due in about 11 days (range 11-14), risk Medium, schedule bearing replacement within 2 weeks.* The overall vibration is still only 2.4 units out, so a simple vibration alarm would not have fired yet.
+5. **Day 52, act now.** Vibration is 84 units out and still rising, health has fallen to 42, risk is High: *replace the bearing now and run at reduced speed.* The simulated failure is on day 56.
+
+Other scenarios (same pipeline, different fault fingerprints):
+[imbalance](docs/screenshots/04_imbalance.png) ·
+[belt slip](docs/screenshots/05_belt_slip.png) ·
+[clogged filter](docs/screenshots/06_clogged_filter.png) ·
+[healthy, no false alarm](docs/screenshots/07_healthy.png)
+
+## How to read the dashboard
+
+| Panel | Question it answers |
+| --- | --- |
+| Asset status | Is it OK? Health index and anomaly score now vs 24 h ago, likely fault, days to maintenance, risk and the recommended action |
+| Health trend | How fast is it declining? Bands (Healthy / Watch / Act) and the predicted time to reach Act, with a range |
+| Fault diagnosis | What is wrong? Match of the current pattern to each known fault, with the strongest evidence |
+| Signals furthest from normal | Which sensors moved most? Distance from normal in noise units (log scale; 3 = outside normal) |
+| Signal status | Expected vs actual value for every signal at the current fan speed |
+| Digital twin | Which component is affected? State, speed, load, ambient and per-component health |
+| Sensor signals vs normal | The raw evidence: each signal against its normal band, with anomaly periods shaded |
+
+Deep links work too, for example `http://localhost:8501/?scenario=filter&day=50`.
+
 ## Run it
 
 ```bash
-python3 -m venv .venv && . .venv/bin/activate
+# Python 3.10 or newer
+python3 -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 streamlit run app.py          # dashboard, http://localhost:8501
 python scripts/validate.py    # five 60-day scenarios vs. the success criteria

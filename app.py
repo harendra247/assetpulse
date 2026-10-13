@@ -78,11 +78,18 @@ titles = {k: v.title for k, v in C.SCENARIOS.items()}
 st.markdown("<div class='top'><h1>AHU-01 supply fan</h1><span class='sub'>Predictive-maintenance monitor · simulated data</span></div>",
             unsafe_allow_html=True)
 k1, k2, k3, k4 = st.columns([1.3, 3.2, 1.2, 0.8], vertical_alignment="bottom")
-scenario = k1.selectbox("Scenario", list(titles), index=1, format_func=titles.get)
+qp = st.query_params                      # optional deep links, e.g. ?scenario=filter&day=40
+_keys = list(titles)
+_i = _keys.index(qp["scenario"]) if qp.get("scenario") in _keys else 1
+scenario = k1.selectbox("Scenario", _keys, index=_i, format_func=titles.get)
 with k4.popover("Seed"):
     seed = st.number_input("Random seed", 1, 9999, C.DEFAULT_SEED, help="Same seed = same data every time")
 res = load(scenario, int(seed))
 default_day = float(min(C.DAYS, (res.scenario.failure_day - 7) if res.scenario.fault else C.DAYS))
+try:
+    default_day = min(float(C.DAYS), max(15.0, float(qp.get("day", default_day))))
+except ValueError:
+    pass
 day = k2.slider("Replay: show what the system knew at day", 15.0, float(C.DAYS), default_day, 0.25)
 truth = k3.toggle("Show simulated truth", value=True, help="Dotted lines mark the real fault start and failure day from the simulator. The analytics never sees them.")
 idx = min(int(np.searchsorted(res.t, day)), len(res.t) - 1)

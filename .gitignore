@@ -34,7 +34,6 @@ yarn-error.log*
 !.env.example
 *.key
 *.pem
-.streamlit/
 .venv_milvious/
 assetpulse/__pycache__/
 
@@ -51,3 +50,8 @@ assetpulse/__pycache__/
 .DS_Store
 Thumbs.db
 
+
+# Python caches
+__pycache__/
+.pytest_cache/
+.mypy_cache/
